@@ -7,23 +7,57 @@ const res = document.getElementById("result");
 const toast = document.getElementById("toast");
 let isDarkMode = false;
 
+function formatResult(value) {
+  if (value.toString().length > 15) {
+    return parseFloat(value.toExponential(2)); // Show exponential notation with 2 significant digits
+  } else if (value % 1 !== 0) {
+    return parseFloat(value.toFixed(2)); // Round to 2 decimal places
+  } else {
+    return value; // Show integer results as is
+  }
+}
+
+function toRadians(degrees) {
+  return degrees * (Math.PI / 180);
+}
+
 function calculate(value) {
-  const expression = value
-    .replace(/plus/g, "+")
-    .replace(/minus/g, "-")
-    .replace(/times/g, "*")
-    .replace(/divided by/g, "/");
+  let expression = value
+    .replace(/÷/g, "/")
+    .replace(/x/g, "*")
+    .replace(/%/g, "/100");
 
   try {
+    // Handle power operation
+    if (expression.includes("^")) {
+      const [base, exponent] = expression.split("^").map(Number);
+      expression = `Math.pow(${base}, ${exponent})`;
+    }
+
+    // Handle square root
+    if (expression.includes("√")) {
+      const number = parseFloat(expression.split("√")[1]);
+      expression = `Math.sqrt(${number})`;
+    }
+
+    // Handle trigonometric functions
+    expression = expression
+      .replace(/sin\(([^)]+)\)/g, (_, angle) => `Math.sin(${toRadians(parseFloat(angle))})`)
+      .replace(/cos\(([^)]+)\)/g, (_, angle) => `Math.cos(${toRadians(parseFloat(angle))})`)
+      .replace(/tan\(([^)]+)\)/g, (_, angle) => `Math.tan(${toRadians(parseFloat(angle))})`);
+
+    // Handle log
+    expression = expression.replace(/log\(([^)]+)\)/g, (_, number) => `Math.log10(${parseFloat(number)})`);
+
     const calculatedValue = eval(expression || null);
-    
+
     if (isNaN(calculatedValue)) {
       res.value = "Error";
       setTimeout(() => {
         res.value = "";
       }, 1300);
     } else {
-      res.value = calculatedValue;
+      res.value = formatResult(calculatedValue);
     }
   } catch (error) {
     res.value = "Error";
@@ -33,16 +67,26 @@ function calculate(value) {
   }
 }
 
-function startVoiceControl(calculator) {
+function toggleVoiceControl() {
+  if (isRecognitionActive) {
+    recognition.stop();
+    isRecognitionActive = false;
+    console.log('Voice recognition stopped');
+  } else {
+    startVoiceControl();
+  }
+}
+
+function startVoiceControl() {
   navigator.mediaDevices.getUserMedia({ audio: true })
-   .then(stream => {
+    .then(stream => {
       console.log('Permission granted');
 
       if ('SpeechRecognition' in window) {
-        const recognition = new window.SpeechRecognition();
+        recognition = new window.SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = 'en-US';
+        recognition.lang = 'en-UK';
 
         recognition.addEventListener('result', (e) => {
           let transcript = '';
@@ -51,24 +95,23 @@ function startVoiceControl(calculator) {
           }
           console.log('Transcript:', transcript.trim());
 
-          if (calculator) {
-            calculator.updateOutput(transcript.trim());
-          } else {
-            res.value = transcript.trim();
-            calculate(transcript.trim());
-          }
+          res.value = transcript.trim();
+          calculate(transcript.trim());
         });
 
         recognition.addEventListener('end', () => {
           console.log('Speech recognition has ended');
+          if (isRecognitionActive) recognition.start(); // Restart recognition if it was stopped by itself
         });
 
         recognition.start();
+        isRecognitionActive = true;
+        console.log('Voice recognition started');
       } else {
         console.log('Speech recognition is not supported');
       }
     })
-   .catch(error => {
+    .catch(error => {
       console.log('Error occurred:', error);
     });
 }
@@ -91,173 +134,81 @@ function changeTheme() {
 }
 
 class Calculator {
-  constructor(previousElement, currentElement) {
-      this.previousElement = previousElement
-      this.currentElement = currentElement
-      this.voiceStart = false
-      this.clearAll()
+  constructor() {
+    this.clearAll();
   }
 
-  // Clear All function of the AC button
-  clearAll(){
-      this.currentOperand = ''
-      this.previousOperand = ''
-      this.symbol = undefined
+  clearAll() {
+    res.value = '';
   }
 
-  // Delete function of the Delete button
-  delete(){
-      this.currentOperand = this.currentOperand.slice(0, -1)
+  attachNumber(number) {
+    res.value += number.toString();
   }
 
-  // Percent button function
-  percent(){
-      let lolz = parseFloat(this.currentOperand)
-      const computation = lolz / 100
-      this.currentOperand = computation
+  delete() {
+    res.value = res.value.slice(0, -1);
   }
 
-  // Function to select operation and compute when there's an input in the previous operand
-  selectSymbol(symbol){
-      if (this.currentOperand === '') return
-      if (this.previousOperand!== ''){
-          this.compute()
-      }
-      this.symbol = symbol
-      this.previousOperand = this.currentOperand
-      this.currentOperand = ''
+  percent() {
+    let value = parseFloat(res.value);
+    const computation = value / 100;
+    res.value = computation;
   }
 
-  // Concatenate numbers so it doesn't add when numbers are clicked
-  attachNumber(number){
-      // To allow only one '.' in the current operand 
-      if (number === '.' && this.currentOperand.includes('.')) return
-      // To set the maximum number of the current operand to max of 15
-      if(this.currentOperand.length <= 15){
-          this.currentOperand = this.currentOperand.toString() + number.toString()
-      } 
+  compute() {
+    calculate(res.value);
   }
 
-  // Compute function to carry out all arithmetic operations
-  compute(){
-      let computation
-      const prev = parseFloat(this.previousOperand)
-      const current = parseFloat(this.currentOperand)
-      if (isNaN(prev) || isNaN(current)) return
-      switch (this.symbol) {
-          case '+': 
-              computation = prev + current
-              break
-          case '-': 
-              computation = prev - current
-              break
-          case 'x':
-              computation = prev * current
-              break
-          case '÷':
-              computation = prev / current
-              break
-          default:
-              return
-      }
-      this.currentOperand = computation
-      this.symbol = undefined
-      this.previousOperand = ''
-      if (this.voiceStart) {
-          this.speak();
-      }
+  updateOutput() {
+    // Update the display if necessary
   }
 
-  // Adding commas to seperate larger numbers
-  getDisplayNumber(number){
-      const stringNumber = number.toString()
-      const integerDigits = parseFloat(stringNumber.split('.')[0])
-      const decimalDigits = stringNumber.split('.')[1]
-      let integerDisplay 
-      if (isNaN(integerDigits)){
-          integerDisplay = ''
-      }else {
-          integerDisplay = integerDigits.toLocaleString('en', { maximumFractionDigits: 0})
-      }
-      if (decimalDigits!= null) {
-          return `${integerDisplay}.${decimalDigits}`
-      }else {
-          return integerDisplay
-      }
-  }
-
-  // Updates output after every input
-  updateOutput(val){   
-      this.currentElement.innerText = this.getDisplayNumber(this.currentOperand)
-      if (this.symbol!= null) {
-          this.previousElement.innerText = `${this.getDisplayNumber(this.previousOperand)} ${this.symbol}`
-      } else {
-          this.previousElement.innerText = ''
-      }
-      if (val!= null){
-          // console.log(`there's a voice input`)
-          this.currentOperand = val
-          this.previousElement.innerText = this.currentOperand
-          this.currentElement.innerText = eval(this.currentOperand)
-          this.speak()
-      }
-  }
-
-  // Voice command
-  voice(val) {
-      this.voiceStart = val;
-  }
-  speak() {
-      // Set the text and voice attributes.
-      let speech = new window.SpeechSynthesisUtterance();
-      speech.text = `Your answer is ${eval(this.currentOperand)}`
-      speech.volume = 1;
-      speech.rate = 1;
-      speech.pitch = 1;
-      window.speechSynthesis.speak(speech);
-      speech.onend = ()=>{alat()}
-      speech.addEventListener('onend', toggle)
-  }
-
-  // Mic button trigger
   startVoiceControl() {
-      startVoiceControl(this);
+    toggleVoiceControl();
   }
 }
 
-// Create a new instance of the Calculator class
-const calculator = new Calculator(previousElement, currentElement);
+const calculator = new Calculator();
 
-// Add event listeners for the calculator buttons
-document.addEventListener("DOMContentLoaded", function() {
-  // Add event listeners for the calculator buttons
-  document.querySelectorAll(".button").forEach(button => {
-    button.addEventListener("click", function() {
-      const value = this.textContent;
-      calculator.attachNumber(value);
-      calculator.updateOutput();
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".button-row input[type='button']").forEach(button => {
+    button.addEventListener("click", function () {
+      const value = this.value;
+      liveScreen(value);
     });
   });
 
-  // Add event listener for the equals button
-  document.getElementById("equals").addEventListener("click", function() {
+  document.getElementById("equals").addEventListener("click", function () {
     calculator.compute();
-    calculator.updateOutput();
   });
 
-  // Add event listener for the clear button
-  document.getElementById("clear").addEventListener("click", function() {
+  document.getElementById("clear").addEventListener("click", function () {
     calculator.clearAll();
-    calculator.updateOutput();
   });
 
-  // Add event listener for the voice button
-  document.getElementById("voice").addEventListener("click", function() {
+  document.getElementById("voice").addEventListener("click", function () {
     calculator.startVoiceControl();
   });
 
-  // Add event listener for the theme toggle button
-  document.getElementById("theme-toggle").addEventListener("click", function() {
+  document.getElementById("theme-toggle").addEventListener("click", function () {
     changeTheme();
   });
+});
+
+function liveScreen(value) {
+  if (value === "sin" || value === "cos" || value === "tan" || value === "log" || value === "sqrt") {
+    res.value += value + "(";
+  } else if (value === "^" || value === "√" || value === "%") {
+    res.value += value;
+  } else {
+    res.value += value;
+  }
+}
+
+const backspaceButton = document.getElementById("backspace-button");
+const resultInput = document.getElementById("result");
+
+backspaceButton.addEventListener("click", function() {
+  resultInput.value = resultInput.value.slice(0, -1);
 });

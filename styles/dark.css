@@ -39,7 +39,7 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 80%;
+  width: 87%;
 }
 
 .top-buttons {
@@ -70,7 +70,28 @@ input {
 
 input[type="text"] {
   background-color: rgb(47, 51, 50);
-  width: 223px;
+  width: 318px;
+  float: left; 
+  padding-left: 20px; 
+  box-sizing: border-box;
+} 
+
+#backspace-button {
+  position: relative;
+  right: 30px;
+  top: 50%; 
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  float: left; 
+}
+
+
+#backspace-button:hover {
+  color: #ff0000; 
 }
 
 input[type="button"]:hover {
@@ -80,8 +101,36 @@ input[type="button"]:hover {
 
 #clear-button {
   color: #fff;
-  background-color: rgb(255, 42, 42);
+  background-color:#ff0000;
   font-size: large;
+  margin-right: 25px;
+}
+
+#clear-button:hover {
+  background-color: #cc0000;
+  color: #fff;
+}
+
+#major-button {
+  color: #fff;
+  background-color:  rgb(248, 103, 36);
+  font-size: large;
+}
+
+#major-button:hover {
+  background-color: rgb(215, 89, 30);
+  color: #fff;
+}
+
+#equal-button {
+  color: #fff;
+  background-color:  rgb(252, 162, 28);
+  font-size: large;
+}
+
+#equal-button:hover {
+  background-color:rgb(221, 136, 9);
+  color: #fff;
 }
 
 a {

@@ -31,33 +31,45 @@
         </div>
       </div>
 
-      <div class="first-row">
+      <div class="row">
         <input type="text" name="result" id="result" placeholder="Result" readonly />
+        <button type="button" id="backspace-button">&larr;</button>
         <input type="button" value="C" onclick="result.value=''" id="clear-button" />
       </div>
-      <div class="second-row">
+      <div class="row">
+        <input type="button" value="^" onclick="liveScreen('^')" id="power-button"/>
+        <input type="button" value="√" onclick="liveScreen('√')" id="root-button"/>
+        <input type="button" value="%" onclick="liveScreen('%')" id="percentage-button"/>
+        <input type="button" value="(" onclick="liveScreen('(')" id="open-bracket"/>
+        <input type="button" value=")" onclick="liveScreen(')')" id="closed-bracket"/>
+      </div>
+      <div class="row">
         <input type="button" value="1" onclick="liveScreen(1)" />
         <input type="button" value="2" onclick="liveScreen(2)" />
         <input type="button" value="3" onclick="liveScreen(3)" />
-        <input type="button" value="+" onclick="liveScreen('+')" />
+        <input type="button" value="sin" onclick="liveScreen('sin')" id="sin-button"/>
+        <input type="button" value="+" onclick="liveScreen('+')" id="major-button"/>
       </div>
-      <div class="third-row">
+      <div class="row">
         <input type="button" value="4" onclick=" liveScreen(4)" />
         <input type="button" value="5" onclick=" liveScreen(5)" />
         <input type="button" value="6" onclick=" liveScreen(6)" />
-        <input type="button" value="-" onclick="liveScreen('-')" />
+        <input type="button" value="cos" onclick="liveScreen('cos')" id="cos-button"/>
+        <input type="button" value="-" onclick="liveScreen('-')" id="major-button"/>
       </div>
-      <div class="fourth-row">
+      <div class="row">
         <input type="button" value="7" onclick="liveScreen(7)" />
         <input type="button" value="8" onclick="liveScreen(8)" />
         <input type="button" value="9" onclick=" liveScreen(9)" />
-        <input type="button" value="x" onclick="liveScreen('*')" />
+        <input type="button" value="tan" onclick="liveScreen('tan')" id="tan-button"/>
+        <input type="button" value="x" onclick="liveScreen('*')" id="major-button"/>
       </div>
-      <div class="fifth-row">
-        <input type="button" value="=" onclick="calculate(result.value)" />
+      <div class="row">
+        <input type="button" value="=" onclick="calculate(result.value)" id="equal-button"/>
         <input type="button" value="0" onclick="liveScreen(0)" />
         <input type="button" value="." onclick="liveScreen('.')" />
-        <input type="button" value="÷" onclick="liveScreen('÷')" />
+        <input type="button" value="log" onclick="liveScreen('log')" id="log-button"/>
+        <input type="button" value="÷" onclick="liveScreen('÷')" id="major-button"/>
       </div>
     </div>
   </div>

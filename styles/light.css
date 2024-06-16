@@ -36,7 +36,7 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 80%;
+  width: 87%;
 }
 
 .top-buttons {
@@ -51,7 +51,6 @@ input {
   font-weight: bold;
   cursor: pointer;
   width: 70px;
-  background-color: #60ffe7;
   border-radius: 100px;
   margin: 0.2em;
 }
@@ -73,7 +72,27 @@ input[type="button"] {
 
 input[type="text"] {
   background-color: rgb(255, 243, 253);
-  width: 222.5px;
+  width: 308px;
+  float: left; 
+  padding-left: 20px; 
+  box-sizing: border-box;
+}
+
+#backspace-button {
+  position: relative;
+  right: 30px;
+  top: 50%; 
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #000000;
+  font-size: 1em;
+  cursor: pointer;
+  float: left; 
+}
+
+#backspace-button:hover {
+  color: #ff0000; 
 }
 
 input[type="button"]:hover {
@@ -83,7 +102,34 @@ input[type="button"]:hover {
 
 #clear-button {
   color: #fff;
+  background-color: rgb(107, 0, 107);
+}
+
+#clear-button:hover {
+  background-color: rgb(70, 1, 70);
+  color: #fff;
+}
+
+#major-button {
+  color: #fff;
+  background-color:  rgb(53, 1, 71);
+  font-size: large;
+}
+
+#major-button:hover {
+  color: #fff;
   background-color: rgb(26, 1, 37);
+}
+
+#equal-button {
+  color: #fff;
+  background-color:  rgb(252, 28, 222);
+  font-size: large;
+}
+
+#equal-button:hover {
+  background-color:rgb(146, 1, 103);
+  color: #fff;
 }
 
 a {
